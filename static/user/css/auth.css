@@ -1,0 +1,612 @@
+/* Custom Properties based on the provided color palette */
+:root {
+  --light-white-gray-bg: #f3f3f3;
+  --gray-text: #aaa;
+  --dark-green: #00483D;
+  --dark-green-hover: #003d34;
+  --light-green: #009981;
+  --light-green-hover: #008573;
+  --light-gray: #EBEBEB;
+  --light-gray-border: 1px solid #EBEBEB;
+  --black-text: #484B4B;
+  --red-text: #FD475A;
+  --red-border: 1px solid #FC521D;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --card-shadow: 0 10px 30px rgba(0, 72, 61, 0.1);
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Auth Popup Styles */
+.hoangvumobile-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+  font-family: var(--font-family);
+}
+
+.hoangvumobile-popup-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.hoangvumobile-popup-container {
+  width: 100%;
+  max-width: 450px;
+  margin: 0 20px;
+  position: relative;
+  transform: translateY(30px);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.hoangvumobile-popup-overlay.active .hoangvumobile-popup-container {
+  transform: translateY(0);
+}
+
+.hoangvumobile-popup-card {
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  position: relative;
+  color: var(--black-text);
+}
+
+.hoangvumobile-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background-color: var(--light-gray);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: var(--transition);
+  overflow: hidden;
+}
+
+.hoangvumobile-close-btn:hover {
+  background-color: var(--dark-green);
+}
+
+.hoangvumobile-close-btn svg {
+  width: 18px;
+  height: 18px;
+  color: var(--gray-text);
+  transition: all 0.3s ease;
+}
+
+.hoangvumobile-close-btn:hover svg {
+  color: white;
+  transform: rotate(360deg);
+}
+
+.hoangvumobile-card-header {
+  padding: 20px 20px 0;
+}
+
+.hoangvumobile-tabs {
+  display: flex;
+  position: relative;
+  border-radius: 8px;
+  background-color: var(--light-gray);
+  padding: 4px;
+  margin-bottom: 20px;
+}
+
+.hoangvumobile-tab-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background-color: transparent;
+  color: var(--black-text);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  position: relative;
+  z-index: 2;
+  transition: var(--transition);
+  border-radius: 6px;
+}
+
+.hoangvumobile-tab-btn.active {
+  color: white;
+}
+
+.hoangvumobile-tab-indicator {
+  position: absolute;
+  height: calc(100% - 8px);
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  background-color: var(--dark-green);
+  border-radius: 6px;
+  transition: var(--transition);
+  z-index: 1;
+}
+
+.hoangvumobile-card-body {
+  position: relative;
+  z-index: 1;
+}
+
+.hoangvumobile-form-content {
+  display: none;
+  padding: 30px;
+  animation: hoangvumobileFadeIn 0.5s forwards;
+}
+
+.hoangvumobile-form-content.active {
+  display: block;
+}
+
+@keyframes hoangvumobileFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hoangvumobile-form-title {
+  font-size: 24px;
+  color: var(--dark-green);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.hoangvumobile-form-subtitle {
+  color: var(--gray-text);
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.hoangvumobile-form-group {
+  margin-bottom: 24px;
+}
+
+.hoangvumobile-input-container {
+  position: relative;
+}
+
+.hoangvumobile-input-container input {
+  width: 100%;
+  padding: 12px 0;
+  font-size: 16px;
+  border: none;
+  border-bottom: 2px solid var(--light-gray);
+  background: transparent;
+  transition: var(--transition);
+  outline: none;
+  z-index: 1;
+  position: relative;
+  font-family: var(--font-family);
+}
+
+.hoangvumobile-input-container input:focus {
+  border-color: var(--light-green);
+}
+
+.hoangvumobile-input-container label {
+  position: absolute;
+  left: 0;
+  top: 12px;
+  color: var(--gray-text);
+  font-size: 16px;
+  transition: var(--transition);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hoangvumobile-input-container input:focus ~ label,
+.hoangvumobile-input-container input:not(:placeholder-shown) ~ label {
+  top: -10px;
+  font-size: 12px;
+  color: var(--light-green);
+  font-weight: 500;
+}
+
+.hoangvumobile-input-underline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  background-color: var(--light-green);
+  transition: var(--transition);
+}
+
+.hoangvumobile-input-container input:focus ~ .hoangvumobile-input-underline {
+  width: 100%;
+}
+
+.hoangvumobile-toggle-password {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--gray-text);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.hoangvumobile-toggle-password:hover {
+  color: var(--black-text);
+}
+
+.hoangvumobile-hidden {
+  display: none;
+}
+
+.hoangvumobile-forgot-password {
+  text-align: right;
+  margin-bottom: 24px;
+}
+
+.hoangvumobile-forgot-password a {
+  color: var(--light-green);
+  text-decoration: none;
+  font-size: 14px;
+  transition: var(--transition);
+}
+
+.hoangvumobile-forgot-password a:hover {
+  color: var(--dark-green);
+  text-decoration: underline;
+}
+
+.hoangvumobile-submit-btn {
+  width: 100%;
+  padding: 14px;
+  background-color: var(--dark-green);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-family);
+}
+
+.hoangvumobile-submit-btn:hover {
+  background-color: var(--dark-green-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 72, 61, 0.2);
+}
+
+.hoangvumobile-submit-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 72, 61, 0.2);
+}
+
+.hoangvumobile-submit-btn svg {
+  transition: var(--transition);
+}
+
+.hoangvumobile-submit-btn:hover svg {
+  transform: translateX(4px);
+}
+
+.hoangvumobile-card-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.hoangvumobile-decoration-circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.05;
+}
+
+.hoangvumobile-circle-1 {
+  width: 300px;
+  height: 300px;
+  background-color: var(--dark-green);
+  top: -150px;
+  right: -150px;
+}
+
+.hoangvumobile-circle-2 {
+  width: 200px;
+  height: 200px;
+  background-color: var(--light-green);
+  bottom: -100px;
+  left: -100px;
+}
+
+/* Toast Notification Styles */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toast {
+  min-width: 300px;
+  max-width: 400px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transform: translateX(120%);
+  transition: transform 0.3s ease;
+  font-family: var(--font-family);
+}
+
+.toast.show {
+  transform: translateX(0);
+}
+
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toast-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast.success .toast-icon {
+  color: var(--light-green);
+}
+
+.toast.error .toast-icon {
+  color: var(--red-text);
+}
+
+.toast-message {
+  font-size: 14px;
+  color: var(--black-text);
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--gray-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+/* OTP Modal Styles - Updated with new theme */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  font-family: var(--font-family);
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 16px;
+  padding: 30px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: var(--card-shadow);
+  text-align: center;
+  position: relative;
+  animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.modal-content h2 {
+  font-size: 24px;
+  color: var(--dark-green);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.modal-content p {
+  color: var(--gray-text);
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+#userEmail {
+  color: var(--black-text);
+  font-weight: 600;
+}
+
+.otp-input-container {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.otp-input {
+  width: 45px;
+  height: 55px;
+  border: 2px solid var(--light-gray);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--dark-green);
+  background-color: var(--light-white-gray-bg);
+  transition: var(--transition);
+}
+
+.otp-input:focus {
+  border-color: var(--light-green);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 153, 129, 0.2);
+  background-color: white;
+}
+
+#verifyBtn {
+  width: 100%;
+  padding: 14px;
+  background-color: var(--dark-green);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 16px;
+  font-family: var(--font-family);
+}
+
+#verifyBtn:hover {
+  background-color: var(--dark-green-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 72, 61, 0.2);
+}
+
+#verifyBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 72, 61, 0.2);
+}
+
+.resend-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+#resendBtn {
+  color: var(--light-green);
+  text-decoration: none;
+  font-size: 14px;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+#resendBtn:hover {
+  color: var(--dark-green);
+  text-decoration: underline;
+}
+
+#resendCountdown {
+  color: var(--gray-text);
+  font-size: 14px;
+}
+
+#countdown {
+  font-weight: 600;
+  color: var(--dark-green);
+}
+
+.modal-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.modal-decoration-circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.05;
+}
+
+.modal-circle-1 {
+  width: 200px;
+  height: 200px;
+  background-color: var(--dark-green);
+  top: -100px;
+  right: -100px;
+}
+
+.modal-circle-2 {
+  width: 150px;
+  height: 150px;
+  background-color: var(--light-green);
+  bottom: -75px;
+  left: -75px;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 480px) {
+  .modal-content {
+    padding: 24px 20px;
+  }
+  
+  .otp-input {
+    width: 40px;
+    height: 50px;
+    font-size: 18px;
+  }
+}
