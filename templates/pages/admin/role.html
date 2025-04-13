@@ -1,0 +1,375 @@
+{{ define "content" }}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Vai trò VuMobile</h4>
+                    <form method="POST" id="createRoleVuMobile">
+                        <div class="row">
+                            <!-- Tên vai trò -->
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="name" name="name" placeholder="Nhập tên vai trò">
+                                    <label for="name">Tên vai trò</label>
+                                </div>
+                            </div>
+                    
+                            <!-- Slug -->
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="slug" name="slug" placeholder="Nhập slug">
+                                    <label for="slug">Slug</label>
+                                </div>
+                            </div>
+                    
+                            <!-- Mô tả -->
+                            <div class="col-12">
+                                <div class="form-floating mb-3">
+                                    <textarea class="form-control" placeholder="Mô tả vai trò" id="description" name="description" style="height: 120px;"></textarea>
+                                    <label for="description">Mô tả</label>
+                                </div>
+                            </div>
+                    
+                            <!-- Trạng thái -->
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <select class="form-select" id="status" name="status" aria-label="Chọn trạng thái">
+                                        <option value="active" selected>Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                    <label for="status">Trạng thái</label>
+                                </div>
+                            </div>
+                    
+                            <!-- Nút submit -->
+                            <div class="col-12">
+                                <div class="d-md-flex align-items-center">
+                                    <div class="ms-auto mt-3 mt-md-0">
+                                        <button type="submit" class="btn btn-primary hstack gap-2">
+                                            <i class="ti ti-send fs-4"></i>
+                                            Lưu vai trò
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex mb-1 align-items-center">
+                        <h4 class="card-title mb-0">Danh sách vai trò</h4>
+                    </div>
+                    <div class="table-responsive border rounded-1" data-bs-theme="dark">
+                        <table class="table text-nowrap table-dark mb-0 align-middle">
+                            <thead class="text-dark fs-4">
+                                <tr>
+                                    <th><h6 class="fs-4 fw-semibold text-white mb-0">STT</h6></th>
+                                    <th><h6 class="fs-4 fw-semibold text-white mb-0">Tên vai trò</h6></th>
+                                    <th><h6 class="fs-4 fw-semibold text-white mb-0">Slug</h6></th>
+                                    <th><h6 class="fs-4 fw-semibold text-white mb-0">Trạng thái</h6></th>
+                                    <th><h6 class="fs-4 fw-semibold text-white mb-0">Chức năng</h6></th>
+                                </tr>
+                            </thead>
+                            <tbody id="role-table-body">
+                                <!-- Dữ liệu động sẽ được thêm ở đây -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Phân trang -->
+                    <nav aria-label="Page navigation" class="mt-3">
+                        <ul class="pagination justify-content-center" id="pagination">
+                            <!-- Nút phân trang sẽ được thêm động -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Tự động tạo slug từ tên
+    document.getElementById("name").addEventListener("input", function () {
+        let name = this.value;
+        let slug = name.toLowerCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Bỏ dấu tiếng Việt
+            .replace(/\s+/g, "-") // Thay khoảng trắng bằng dấu gạch ngang
+            .replace(/[^\w\-]+/g, "") // Bỏ ký tự đặc biệt
+            .replace(/\-\-+/g, "-") // Bỏ nhiều dấu gạch ngang liên tiếp
+            .replace(/^-+/, "").replace(/-+$/, ""); // Bỏ dấu gạch ngang ở đầu và cuối
+        document.getElementById("slug").value = slug;
+    });
+
+    // Xử lý form tạo vai trò
+    document.getElementById("createRoleVuMobile").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        fetch("/admin/api/role", {
+            method: "POST",
+            body: formData,
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                Swal.fire({
+                    icon: "success",
+                    title: "Thành công",
+                    text: data.message,
+                    timer: 1500,
+                    showConfirmButton: false,
+                }).then(() => {
+                    this.reset();
+                    loadRoleList(1); // Tải lại trang 1 sau khi tạo
+                });
+            } else {
+                let html = data.message;
+                if (data.errors) {
+                    html += "<ul>";
+                    for (let key in data.errors) {
+                        html += `<li>${data.errors[key]}</li>`;
+                    }
+                    html += "</ul>";
+                }
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    html: html,
+                });
+            }
+        })
+        .catch(err => {
+            Swal.fire({
+                icon: "error",
+                title: "Lỗi kết nối",
+                text: err.message,
+            });
+        });
+    });
+
+    // Tải danh sách vai trò
+    function loadRoleList(page = 1, limit = 10) {
+        fetch(`/admin/api/role?page=${page}&limit=${limit}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    const { roles, page: currentPage, total, totalPages } = data.data;
+                    const tbody = document.getElementById("role-table-body");
+                    tbody.innerHTML = "";
+
+                    roles.forEach((role, index) => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td><h6 class="fs-4 fw-semibold mb-0">${(currentPage - 1) * limit + index + 1}</h6></td>
+                            <td><p class="mb-0 fw-normal">${role.name}</p></td>
+                            <td><div class="d-flex align-items-center">${role.slug}</div></td>
+                            <td><span class="badge ${role.status === 'active' ? 'bg-primary-subtle text-success' : 'bg-danger-subtle text-danger'}">${role.status}</span></td>
+                            <td>
+                                <div class="dropdown dropstart">
+                                    <a href="javascript:void(0)" class="text-muted" data-bs-toggle="dropdown">
+                                        <i class="ti ti-dots-vertical fs-12"></i>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item d-flex align-items-center gap-3 edit-role" href="#" data-id="${role.id}"><i class="fs-4 ti ti-edit"></i>Chỉnh sửa</a></li>
+                                        <li><a class="dropdown-item d-flex align-items-center gap-3 delete-role" href="#" data-id="${role.id}"><i class="fs-4 ti ti-trash"></i>Xóa</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+
+                    // Cập nhật phân trang
+                    updatePagination(currentPage, totalPages);
+                }
+            })
+            .catch(error => {
+                console.error("Lỗi khi lấy vai trò:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể tải danh sách vai trò",
+                });
+            });
+    }
+
+    // Cập nhật giao diện phân trang
+    function updatePagination(currentPage, totalPages) {
+        const pagination = document.getElementById("pagination");
+        pagination.innerHTML = "";
+
+        // Nút Previous
+        const prevLi = document.createElement("li");
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" onclick="loadRoleList(${currentPage - 1}); return false;">Trước</a>`;
+        pagination.appendChild(prevLi);
+
+        // Các số trang
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement("li");
+            li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#" onclick="loadRoleList(${i}); return false;">${i}</a>`;
+            pagination.appendChild(li);
+        }
+
+        // Nút Next
+        const nextLi = document.createElement("li");
+        nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" onclick="loadRoleList(${currentPage + 1}); return false;">Sau</a>`;
+        pagination.appendChild(nextLi);
+    }
+
+    // Xử lý chỉnh sửa và xóa vai trò
+    document.addEventListener("click", function (e) {
+        // Xử lý chỉnh sửa
+        if (e.target.closest(".edit-role")) {
+            e.preventDefault();
+            const id = e.target.closest(".edit-role").getAttribute("data-id");
+
+            fetch(`/admin/api/role/${id}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        const role = data.data;
+
+                        Swal.fire({
+                            title: 'Chỉnh sửa vai trò',
+                            html: `
+                                <form id="editRoleVuMobile" class="mt-3">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <input type="text" class="form-control" id="edit-name" name="name" placeholder="Tên vai trò" value="${role.name}">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <input type="text" class="form-control" id="edit-slug" name="slug" placeholder="Slug" value="${role.slug}">
+                                        </div>
+                                        <div class="col-12 mb-3">
+                                            <textarea class="form-control" id="edit-description" name="description" placeholder="Mô tả" style="height: 120px;">${role.description || ''}</textarea>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <select class="form-select" id="edit-status" name="status">
+                                                <option value="active" ${role.status === 'active' ? 'selected' : ''}>Active</option>
+                                                <option value="inactive" ${role.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </form>
+                            `,
+                            confirmButtonText: 'Lưu thay đổi',
+                            showCancelButton: true,
+                            focusConfirm: false,
+                            preConfirm: () => {
+                                const formData = {
+                                    name: document.getElementById('edit-name').value,
+                                    slug: document.getElementById('edit-slug').value,
+                                    description: document.getElementById('edit-description').value,
+                                    status: document.getElementById('edit-status').value
+                                };
+
+                                return fetch(`/admin/api/role/${id}`, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify(formData)
+                                })
+                                .then(res => res.json())
+                                .then(response => {
+                                    if (response.status !== "success") {
+                                        throw new Error(response.message || "Lỗi cập nhật.");
+                                    }
+                                    return response;
+                                })
+                                .catch(err => {
+                                    Swal.showValidationMessage(err.message);
+                                });
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed && result.value.status === "success") {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Thành công',
+                                    text: result.value.message,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+                                loadRoleList(); // Tải lại trang hiện tại
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Lỗi",
+                            text: data.message,
+                        });
+                    }
+                })
+                .catch(err => {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Lỗi kết nối",
+                        text: err.message,
+                    });
+                });
+        }
+
+        // Xử lý xóa
+        if (e.target.closest(".delete-role")) {
+            e.preventDefault();
+            const id = e.target.closest(".delete-role").getAttribute("data-id");
+
+            Swal.fire({
+                title: 'Bạn có chắc chắn?',
+                text: "Vai trò này sẽ bị xóa vĩnh viễn!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/api/role/${id}`, {
+                        method: 'DELETE',
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Thành công',
+                                text: data.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                loadRoleList(); // Tải lại trang hiện tại
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Lỗi',
+                                text: data.message,
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi kết nối',
+                            text: err.message,
+                        });
+                    });
+                }
+            });
+        }
+    });
+
+    // Tải danh sách khi trang được tải
+    document.addEventListener("DOMContentLoaded", () => loadRoleList(1));
+</script>
+{{ end }}

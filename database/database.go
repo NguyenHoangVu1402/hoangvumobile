@@ -1,109 +1,66 @@
 package database
 
 import (
+	"fmt"
 	"log"
-	"sync"
+	"os"
 
-	"hoangvumobile/config"
-	"hoangvumobile/models"
+	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"hoangvumobile/models"
 )
 
-var (
-	db     *gorm.DB
-	dbOnce sync.Once
-)
+var DB *gorm.DB
 
-// Init initializes the database connection
-func Init() {
-	dbOnce.Do(func() {
-		var err error
-		cfg := config.GetConfig()
-
-		// Configure logger
-		loggerConfig := logger.Default
-		if cfg.AppEnv == "development" {
-			loggerConfig = logger.Default.LogMode(logger.Info)
-		}
-
-		// Connect to database based on driver
-		switch cfg.DBDriver {
-		case "mysql":
-			db, err = gorm.Open(mysql.Open(cfg.DBDSN), &gorm.Config{
-				Logger: loggerConfig,
-			})
-		case "postgres":
-			db, err = gorm.Open(postgres.Open(cfg.DBDSN), &gorm.Config{
-				Logger: loggerConfig,
-			})
-		default:
-			log.Fatalf("Unsupported database driver: %s", cfg.DBDriver)
-		}
-
-		if err != nil {
-			log.Fatalf("Không thể kết nối đến cơ sở dữ liệu: %v", err)
-		}
-
-		// Configure connection pool
-		sqlDB, err := db.DB()
-		if err != nil {
-			log.Fatalf("Không thể cấu hình kết nối cơ sở dữ liệu: %v", err)
-		}
-
-		// Set connection pool settings
-		sqlDB.SetMaxIdleConns(10)
-		sqlDB.SetMaxOpenConns(100)
-
-		// Auto migrate models
-		err = AutoMigrate()
-		if err != nil {
-			log.Fatalf("Không thể tạo các bảng trong cơ sở dữ liệu: %v", err)
-		}
-
-		log.Println("Kết nối cơ sở dữ liệu thành công")
-	})
-}
-
-// GetDB returns the database connection
-func GetDB() *gorm.DB {
-	if db == nil {
-		Init()
-	}
-	return db
-}
-
-// AutoMigrate automatically migrates the database schema
-func AutoMigrate() error {
-	// Enable UUID extension for PostgreSQL
-	if config.GetConfig().DBDriver == "postgres" {
-		if err := db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";").Error; err != nil {
-			return err
-		}
+// ConnectDB - Kết nối với MySQL
+func ConnectDB() {
+	// Load biến môi trường từ .env
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("❌ Lỗi khi load file .env:", err)
 	}
 
-	// Auto migrate models
-	err := db.AutoMigrate(
-		&models.User{},
-		&models.OTP{},
-		&models.Token{},
+	// Lấy thông tin từ biến môi trường
+	dbUser := os.Getenv("DB_USER")
+	dbPass := os.Getenv("DB_PASS")
+	dbHost := os.Getenv("DB_HOST")
+	dbName := os.Getenv("DB_NAME")
+
+	// Chuỗi kết nối MySQL (Data Source Name - DSN)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		dbUser, dbPass, dbHost, dbName,
 	)
 
-	return err
+	// Mở kết nối với MySQL
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatal("❌ Không thể kết nối MySQL:", err)
+	}
+
+	DB = db
+	fmt.Println("✅ Kết nối MySQL thành công!")
 }
 
-// Close closes the database connection
-func Close() {
-	if db != nil {
-		sqlDB, err := db.DB()
-		if err != nil {
-			log.Printf("Lỗi khi lấy đối tượng DB: %v", err)
-			return
-		}
-		if err := sqlDB.Close(); err != nil {
-			log.Printf("Lỗi khi đóng kết nối cơ sở dữ liệu: %v", err)
+// GetDB - Trả về kết nối database
+func GetDB() *gorm.DB {
+	return DB
+}
+
+func AutoMigrateTables() {
+	db := GetDB()
+
+	tables := []interface{}{
+		&models.User{},
+		&models.Role{},
+		&models.DetailUser{}, 
+	}
+
+	for _, table := range tables {
+		if err := db.AutoMigrate(table); err != nil {
+			fmt.Printf("❌ Lỗi khi migrate bảng %T: %v\n", table, err)
+		} else {
+			fmt.Printf("✅ Đã migrate bảng %T thành công!\n", table)
 		}
 	}
 }
